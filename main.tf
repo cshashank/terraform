@@ -2,20 +2,35 @@ provider "aws" {
   region = "us-east-2"
 }
 
+variable "site_name" {
+  description= "site name used for the bucket"
+  type = string
+  default = "skc-default-web-site"
+}
+
 resource "aws_s3_bucket" "b" {
-  bucket = "skc-tf-bucket"
+  bucket = var.site_name
   acl = "private"
 
   tags = {
-      Name = "My bucket1"
+      Name = var.site_name
       Environment = "Dev"
   }
 }
 
+data "aws_vpc" "anyname"{
+  default = true
+}
+
+output "my_output" {
+  value = concat([data.aws_vpc.anyname.cidr_block],[var.site_name]) 
+}
+
 resource "aws_s3_bucket_object" "object" {
-  bucket = "skc-tf-bucket"
-  key = "index.html"
+  key="index.html"
+  bucket = var.site_name
   source = "index.html"
+  force_destroy = true
 }
 
 
